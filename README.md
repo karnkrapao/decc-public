@@ -16,7 +16,11 @@ Add a workspace once. Let DECC detect the runnable parts inside it, then run, in
 
 ---
 
-> **Release status:** DECC `0.1.0` is currently in release-candidate hardening. Signed public installers are not published yet. When the first production build is ready, it will appear in [GitHub Releases](https://github.com/karnkrapao/decc/releases).
+> **Preview status:** DECC `0.1.0` is pre-release. Signed public installers are not published yet. When the first production build is ready, it will appear in [GitHub Releases](https://github.com/karnkrapao/decc/releases).
+
+## Source availability and licensing
+
+DECC may be published with its source visible while the product is still in preview. The repository currently does not include an open-source license. Distribution and commercial-use terms will be published separately when they are finalized.
 
 ## Why DECC
 

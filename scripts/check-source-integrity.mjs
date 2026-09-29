@@ -70,15 +70,16 @@ if (existsSync(resolve(root, ".git")) && sources.length > 0) {
       .map((path) => path.replaceAll("\\", "/")),
   );
   const sensitiveTrackedPathPattern =
-    /(^|\/)(?:\.env(?:\..+)?|id_rsa|id_ed25519|credentials?|secrets?|tokens?|passwords?)(?:$|\/)|\.(?:pem|key|p12|pfx|jks|keystore|db|sqlite|sqlite3|dmp|core)$/i;
+    /(^|\/)(?:\.env(?:\..+)?|\.envrc|\.npmrc|\.netrc|\.pypirc|\.git-credentials|id_rsa|id_ed25519|credentials?(?:\.[^/]+)?|secrets?|tokens?|passwords?|service-account(?:\.[^/]+)?)(?:$|\/)|\.(?:pem|key|p12|pfx|jks|keystore|mobileprovision|db|sqlite|sqlite3|dmp|core)$/i;
   const publicEnvironmentTemplates = new Set([
     ".env.example",
     ".env.sample",
     ".env.template",
   ]);
-  const internalOnlyPaths = new Set(["AGENTS.md"]);
+  const maintainerOnlyTrackedPathPattern =
+    /(^|\/)(?:AGENTS\.md|\.cursor|\.claude|\.codex|\.continue|\.direnv|\.history)(?:$|\/)|(^|\/)\.aider[^/]*$/i;
   const sensitiveTrackedPaths = Array.from(trackedPaths).filter((path) => {
-    if (internalOnlyPaths.has(path)) return true;
+    if (maintainerOnlyTrackedPathPattern.test(path)) return true;
     const baseName = path.split("/").at(-1);
     if (baseName && publicEnvironmentTemplates.has(baseName)) return false;
     return sensitiveTrackedPathPattern.test(path);
@@ -121,34 +122,41 @@ if (existsSync(resolve(root, ".git")) && sources.length > 0) {
     );
   }
 
-  const trackedDocs = spawnSync("git", ["ls-files", "--", "*.md", "**/*.md"], {
-    cwd: root,
-    encoding: "utf8",
-  });
-  if (trackedDocs.error || trackedDocs.status !== 0) {
-    throw new Error(
-      `Could not enumerate tracked documentation: ${trackedDocs.error?.message ?? trackedDocs.stderr.trim()}`,
-    );
-  }
+  const trackedTextPathPattern =
+    /(^|\/)\.gitignore$|\.(?:md|txt|json|jsonc|toml|ya?ml|mjs|cjs|js|jsx|ts|tsx|rs|css|html|ps1|sh|lock)$/i;
+  const localHomePattern =
+    /\/Users\/[^/\s]+\/|\/home\/[^/\s]+\/|[A-Za-z]:\\Users\\[^\\\s]+\\/;
+  const credentialValuePattern =
+    /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|\b(?:AKIA|ASIA)[0-9A-Z]{16}\b|\bAIza[0-9A-Za-z_-]{30,}\b|\bgithub_pat_[A-Za-z0-9_]{20,}\b|\bgh[pousr]_[A-Za-z0-9]{20,}\b|\bxox[baprs]-[A-Za-z0-9-]{10,}\b|\bsk-[A-Za-z0-9_-]{20,}\b/;
+  const leakedTextPaths = [];
+  const credentialValuePaths = [];
 
-  const localHomePattern = /\/Users\/[^/\s]+\/|\/home\/[^/\s]+\/|[A-Za-z]:\\Users\\[^\\\s]+\\/;
-  const leakedDocPaths = [];
-  for (const relativePath of trackedDocs.stdout.split(/\r?\n/).filter(Boolean)) {
+  for (const relativePath of trackedPaths) {
+    if (!trackedTextPathPattern.test(relativePath)) continue;
     const content = readFileSync(resolve(root, relativePath), "utf8");
     content.split(/\r?\n/).forEach((line, index) => {
       if (localHomePattern.test(line)) {
-        leakedDocPaths.push(`${relativePath}:${index + 1}`);
+        leakedTextPaths.push(`${relativePath}:${index + 1}`);
+      }
+      if (credentialValuePattern.test(line)) {
+        credentialValuePaths.push(`${relativePath}:${index + 1}`);
       }
     });
   }
 
-  if (leakedDocPaths.length > 0) {
+  if (leakedTextPaths.length > 0) {
     throw new Error(
-      `Tracked documentation contains machine-specific user-home paths:\n- ${leakedDocPaths.join("\n- ")}`,
+      `Tracked text contains machine-specific user-home paths:\n- ${leakedTextPaths.join("\n- ")}`,
+    );
+  }
+
+  if (credentialValuePaths.length > 0) {
+    throw new Error(
+      `Tracked text contains credential-like secret material:\n- ${credentialValuePaths.join("\n- ")}`,
     );
   }
 }
 
 console.log(
-  `Source integrity OK · ${declaredModules.length} Rust core modules · ${sources.length} release-critical files · all Git-tracked · no source paths ignored · docs free of local user-home paths`,
+  `Source integrity OK · ${declaredModules.length} Rust core modules · ${sources.length} release-critical files · all Git-tracked · no source paths ignored · tracked text free of local user-home paths and credential material`,
 );

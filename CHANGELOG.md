@@ -22,7 +22,7 @@ Notable DECC changes are recorded here. A release date should be added only when
 - Test fixture cleanup and protection against development/test workspace data leaking into production state.
 - Release version consistency across package, Tauri, Cargo, workflow input, and release tag metadata.
 - Windows release validation now tolerates an unavailable Authenticode inspection module only for non-distribution RC validation; strict distribution verification remains fail-closed.
-- Repository hygiene now ignores and rejects common local credentials/state artifacts and keeps internal agent/product notes out of the tracked public tree.
+- Repository hygiene now ignores and rejects common local credentials, machine state, local tool state, and maintainer-only files from the tracked public tree.
 - GitHub Actions use Node 24-compatible action generations.
 
 ### Distribution status

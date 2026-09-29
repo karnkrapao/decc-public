@@ -8,8 +8,16 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.pnpm-store/
 dist
 dist-ssr
+/build/
+/out/
+.cache/
+.vite/
+.tmp/
+/tmp/
+*.tsbuildinfo
 *.local
 
 # Local environment and credentials. Public templates stay trackable.
@@ -31,6 +39,10 @@ dist-ssr
 *.sqlite3
 *.dmp
 *.core
+*.pid
+*.pid.lock
+.eslintcache
+.stylelintcache
 coverage/
 .nyc_output/
 playwright-report/
@@ -40,14 +52,36 @@ recordings/
 /artifacts/
 /release-artifacts/
 
-# Internal product/agent source of truth. Keep it local; public docs live in README/RELEASE/docs.
+# Local maintainer-only files.
 AGENTS.md
+
+# Local AI/editor/tool state. Keep repository configuration intentional and reviewable.
+.cursor/
+.claude/
+.codex/
+.continue/
+.aider*
+.history/
+.direnv/
+.envrc
+*.code-workspace
+
+# Local package/publishing credentials and machine-specific auth configuration.
+.npmrc
+.netrc
+.pypirc
+.git-credentials
+credentials*.json
+service-account*.json
+*.mobileprovision
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
+Desktop.ini
 *.suo
 *.ntvs*
 *.njsproj

@@ -62,7 +62,7 @@ Before pushing a production tag:
 6. `pnpm release:smoke:windows` passes on a real Windows machine.
 7. `pnpm release:verify-signed:macos` passes with real distribution credentials.
 8. `pnpm release:verify-signed:windows` passes with real distribution credentials.
-9. Product/distribution terms have been decided. There is currently no repository `LICENSE`; do not infer open-source permission.
+9. Product/distribution terms have been reviewed for the intended release. If no open-source license is present, public release notes must not describe DECC as open source.
 10. `CHANGELOG.md` and the draft release notes are reviewed.
 11. Final installer QA is performed on clean macOS and Windows user profiles.
 
@@ -122,7 +122,7 @@ The repository may contain public verification metadata such as a future updater
 
 ## Repository hygiene
 
-Release-critical source verification rejects common local/private files from Git tracking, including environment files, private-key containers, local databases, crash dumps, and the internal `AGENTS.md` product/agent source of truth.
+Release-critical source verification rejects common local/private files from Git tracking, including environment files, private-key containers, local databases, crash dumps, local tool state, and maintainer-only instruction files.
 
 Public release documentation belongs in `README.md`, `RELEASE.md`, `CHANGELOG.md`, and `docs/`.
 

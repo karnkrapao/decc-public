@@ -518,10 +518,10 @@ mod tests {
         assert_eq!(listeners[0].process_name.as_deref(), Some("node"));
         assert_eq!(listeners[0].port, 3000);
 
-        let cwds = parse_lsof_cwds("p8211\ncnode\nfcwd\nn/Users/test/project\n");
+        let cwds = parse_lsof_cwds("p8211\ncnode\nfcwd\nn/tmp/decc-test/project\n");
         assert_eq!(
             cwds.get(&8211).map(String::as_str),
-            Some("/Users/test/project")
+            Some("/tmp/decc-test/project")
         );
     }
 

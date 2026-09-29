@@ -33,6 +33,6 @@ Unsigned or ad-hoc release-candidate artifacts are for validation only and are n
 
 ## Supported versions
 
-Until the first production release is published, security fixes target the current release-candidate branch.
+Until the first production release is published, security fixes target the current pre-release development snapshot.
 
 After public releases begin, the latest stable release will be the primary supported version unless the release notes state otherwise.
