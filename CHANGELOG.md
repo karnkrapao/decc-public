@@ -15,6 +15,7 @@ Notable DECC changes are recorded here. A release date should be added only when
 - Tag-gated draft GitHub Release preparation for validated DMG and NSIS install assets.
 - Public product README and documented future in-app update strategy.
 - Public contribution guidance, issue forms, pull-request guidance, and private security-reporting directions.
+- Unsigned public preview-release automation with validated Windows/macOS installers, explicit platform warnings, and SHA-256 checksums.
 
 ### Hardened
 
@@ -30,4 +31,6 @@ Notable DECC changes are recorded here. A release date should be added only when
 
 v0.1.0 remains a release candidate until production macOS signing/notarization, Windows Authenticode signing, release terms/licensing, final clean-machine QA, and final artifact review are complete.
 
-In-app updating is intentionally not enabled yet; signed installer downloads remain the fallback until the Tauri updater path is implemented and verified.
+Unsigned preview installers may be published as GitHub **Pre-releases** for early testing before those production signing gates are available. Production releases remain fail-closed on signing/notarization.
+
+In-app updating is intentionally not enabled yet; GitHub Releases remain the manual fallback until the Tauri updater path is implemented and verified.

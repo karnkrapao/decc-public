@@ -1,0 +1,185 @@
+name: Preview Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: App version to build
+        required: true
+        default: "0.1.0"
+        type: string
+      preview_tag:
+        description: Preview tag (must not start with v)
+        required: true
+        default: "preview-0.1.0-1"
+        type: string
+      release_name:
+        description: GitHub pre-release title
+        required: true
+        default: "DECC 0.1.0 Preview 1"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: decc-preview-${{ inputs.preview_tag }}
+  cancel-in-progress: false
+
+env:
+  DECC_EXPECTED_VERSION: ${{ inputs.version }}
+
+jobs:
+  validate-inputs:
+    name: Validate preview inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate preview tag namespace
+        shell: bash
+        env:
+          PREVIEW_TAG: ${{ inputs.preview_tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$PREVIEW_TAG" =~ ^preview-[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
+            echo "Preview tags must match preview-[0-9A-Za-z._-]+."
+            echo "Production v* tags are reserved for signed distribution releases."
+            exit 1
+          fi
+
+  macos:
+    name: Build unsigned macOS preview
+    needs: validate-inputs
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.5.1
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and validate unsigned macOS preview
+        run: pnpm release:preflight:macos
+
+      - name: Upload preview DMG
+        uses: actions/upload-artifact@v7
+        with:
+          name: DECC-${{ env.DECC_EXPECTED_VERSION }}-macos-preview
+          path: src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 14
+          archive: false
+
+  windows:
+    name: Build unsigned Windows preview
+    needs: validate-inputs
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.5.1
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and validate unsigned Windows preview
+        run: pnpm release:preflight:windows
+
+      - name: Smoke-test installer lifecycle
+        run: pnpm release:smoke:windows
+
+      - name: Upload preview installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: DECC-${{ env.DECC_EXPECTED_VERSION }}-windows-x64-preview
+          path: src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
+          retention-days: 14
+          archive: false
+
+  prepare-preview:
+    name: Prepare draft GitHub pre-release
+    needs:
+      - macos
+      - windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download validated preview installers
+        uses: actions/download-artifact@v7
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate SHA-256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release-assets
+          find . -maxdepth 1 -type f \( -name '*.dmg' -o -name '*-setup.exe' \) -print0 \
+            | sort -z \
+            | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create draft pre-release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.preview_tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ inputs.release_name }}
+          draft: true
+          prerelease: true
+          fail_on_unmatched_files: true
+          body: |
+            ## Unsigned preview
+
+            This is an early DECC preview for testing and feedback. The installers are validated by DECC's cross-platform release preflight, but they are **not yet production code-signed/notarized**.
+
+            - **Windows:** Microsoft Defender SmartScreen may display a warning because the installer is unsigned.
+            - **macOS:** Gatekeeper may block the app because it is not yet signed/notarized. Only override macOS security controls if you intentionally downloaded this preview from this GitHub release and trust the source.
+            - Production releases will remain fail-closed on the existing signing/notarization gates.
+            - Build commit: `${{ github.sha }}`
+
+            SHA-256 hashes are included in `SHA256SUMS.txt`.
+
+            Feedback and bug reports: https://github.com/karnkrapao/decc-public/issues
+          files: |
+            release-assets/*.dmg
+            release-assets/*-setup.exe
+            release-assets/SHA256SUMS.txt

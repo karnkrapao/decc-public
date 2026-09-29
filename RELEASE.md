@@ -34,6 +34,23 @@ These checks are fail-closed. A distribution artifact is not prepared if strict 
 
 When a tag passes both platform jobs, the workflow downloads the validated install assets and prepares a **draft GitHub Release** containing the macOS DMG and Windows NSIS installer. The draft is reviewed manually before publication.
 
+## Unsigned public preview
+
+The separate GitHub Actions **Preview Release** workflow is for early public testing before production signing credentials are available.
+
+It:
+
+- validates that the preview tag does **not** start with `v`,
+- runs the existing macOS release preflight and produces a DMG,
+- runs the existing Windows release preflight and installer lifecycle smoke,
+- publishes only the user-installable DMG and NSIS installer,
+- generates `SHA256SUMS.txt`,
+- prepares a **draft GitHub pre-release** with explicit unsigned/not-notarized warnings.
+
+Preview tags use the `preview-*` namespace. Production `v*` tags remain reserved for the fail-closed signed distribution path.
+
+The preview workflow never calls the strict production signing verification scripts. This is intentional for early testing and does not weaken the production/tag gates.
+
 ## Version rule
 
 `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` must contain the same version.
@@ -105,7 +122,7 @@ The recommended product behavior is:
 
 See [docs/UPDATES.md](docs/UPDATES.md).
 
-Until the updater signing key, updater artifacts, endpoint manifest, UI states, and cross-platform update tests are complete, users should update by installing the newer signed release over the existing version.
+Until the updater signing key, updater artifacts, endpoint manifest, UI states, and cross-platform update tests are complete, users update manually from GitHub Releases. Preview-channel installers may be unsigned and are clearly labeled as such; production releases remain signed/notarized.
 
 ## Credential policy
 

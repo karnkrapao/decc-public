@@ -16,7 +16,7 @@ Add a workspace once. Let DECC detect the runnable parts inside it, then run, in
 
 ---
 
-> **Preview status:** DECC `0.1.0` is pre-release. Signed public installers are not published yet. When the first production build is ready, it will appear in [GitHub Releases](https://github.com/karnkrapao/decc-public/releases).
+> **Preview status:** DECC `0.1.0` is pre-release. Unsigned preview installers are published through [GitHub Releases](https://github.com/karnkrapao/decc-public/releases) for early testing. Windows SmartScreen or macOS Gatekeeper may warn because these preview builds are not yet production-signed/notarized.
 
 ## Source availability and licensing
 
@@ -65,33 +65,33 @@ The goal is simple: **understand a local workspace quickly and control the usefu
 
 ## Download
 
-### Windows
+Preview installers are available from the [GitHub Releases page](https://github.com/karnkrapao/decc-public/releases). Choose the newest release marked **Pre-release**.
 
-The production Windows download will be a signed NSIS installer:
+### Windows preview
+
+Download the NSIS installer:
 
 ```text
 DECC_<version>_x64-setup.exe
 ```
 
-Open the installer and follow the normal Windows installation flow.
+Preview installers are currently unsigned. Microsoft Defender SmartScreen may show a warning. Review the warning carefully and continue only when the installer came from this repository's GitHub Release.
 
-### macOS
+### macOS preview
 
-The production macOS download will be a signed and notarized DMG:
+Download the DMG:
 
 ```text
 DECC_<version>_<architecture>.dmg
 ```
 
-Open the DMG and drag **DECC** into **Applications**.
+Preview DMGs are currently not production-signed/notarized, so Gatekeeper may block the first launch. If you intentionally downloaded DECC from this repository and trust the build, follow Apple's **Privacy & Security → Open Anyway** flow: <https://support.apple.com/102445>.
 
-Tauri documents DMG as the standard outside-the-App-Store installation experience for macOS applications, which is why DECC's release pipeline produces one in addition to the app bundle.
+### Production releases
 
-### Releases
+Production Windows installers will be Authenticode-signed. Production macOS DMGs will use Developer ID signing and notarization.
 
-Production builds will be published from the [GitHub Releases page](https://github.com/karnkrapao/decc-public/releases) after cross-platform verification, signing/notarization checks, and final release review pass.
-
-Release tags prepare a **draft** GitHub Release first so the final assets and notes can be reviewed before publishing.
+Production `v*` tags remain fail-closed on those signing checks. Preview releases use separate `preview-*` tags so an unsigned preview cannot be mistaken for a production release.
 
 ## Updates
 
@@ -171,7 +171,7 @@ cd src-tauri && cargo test
 | `pnpm release:smoke:windows` | Install → launch → uninstall lifecycle test |
 | `pnpm release:verify-signed:windows` | Require valid Authenticode signatures |
 
-The GitHub Actions **Release Candidate** workflow can build unsigned RC artifacts for validation. Distribution/tag runs are fail-closed: strict platform signing checks must pass before a draft release can be prepared.
+The GitHub Actions **Preview Release** workflow builds validated unsigned preview installers and prepares a draft GitHub pre-release for human review. The separate **Release Candidate** production/tag path remains fail-closed: strict platform signing checks must pass before a production draft release can be prepared.
 
 See [RELEASE.md](RELEASE.md) and [CHANGELOG.md](CHANGELOG.md).
 

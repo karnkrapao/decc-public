@@ -78,10 +78,11 @@ The signed/notarized DMG remains the manual install/fallback path.
 Until updater keys, updater artifacts, endpoint configuration, UI states, and cross-platform update tests are all in place:
 
 - Do not show an in-app update button that implies the updater is operational.
-- Publish normal signed installers through Releases.
-- Users update by downloading the new release and installing it over the existing version.
+- Production releases publish normal signed/notarized installers through Releases.
+- Early preview builds may be published separately as clearly labeled unsigned GitHub Pre-releases.
+- Users update manually by downloading the release appropriate for their channel and installing it over the existing version.
 
-This manual fallback is acceptable for the first production release and keeps updater/signing complexity out of the critical path.
+This manual fallback is acceptable for the preview and first production release and keeps updater-signing complexity out of the critical path.
 
 ## Required updater tests
 
