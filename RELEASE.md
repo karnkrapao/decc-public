@@ -124,7 +124,7 @@ The repository may contain public verification metadata such as a future updater
 
 Release-critical source verification rejects common local/private files from Git tracking, including environment files, private-key containers, local databases, crash dumps, local tool state, and maintainer-only instruction files.
 
-Public release documentation belongs in `README.md`, `RELEASE.md`, `CHANGELOG.md`, and `docs/`.
+Public-facing repository documentation belongs in `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, `RELEASE.md`, `CHANGELOG.md`, and `docs/`.
 
 ## Recovery rule
 

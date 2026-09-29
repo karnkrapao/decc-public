@@ -14,6 +14,7 @@ Notable DECC changes are recorded here. A release date should be added only when
 - GitHub cross-platform verification and fail-closed Release Candidate workflow.
 - Tag-gated draft GitHub Release preparation for validated DMG and NSIS install assets.
 - Public product README and documented future in-app update strategy.
+- Public contribution guidance, issue forms, pull-request guidance, and private security-reporting directions.
 
 ### Hardened
 

@@ -4,7 +4,7 @@
 
 Please do **not** open a public GitHub issue for vulnerabilities, exposed credentials, signing problems, or reports that include sensitive local-project data.
 
-Use GitHub's private security reporting / Security Advisory flow for this repository when available.
+Use GitHub's private security reporting flow at `Security` → `Advisories` → `Report a vulnerability`, or open the private report form at <https://github.com/karnkrapao/decc-public/security/advisories/new>.
 
 A useful report includes:
 

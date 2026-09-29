@@ -128,8 +128,11 @@ if (existsSync(resolve(root, ".git")) && sources.length > 0) {
     /\/Users\/[^/\s]+\/|\/home\/[^/\s]+\/|[A-Za-z]:\\Users\\[^\\\s]+\\/;
   const credentialValuePattern =
     /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----|\b(?:AKIA|ASIA)[0-9A-Z]{16}\b|\bAIza[0-9A-Za-z_-]{30,}\b|\bgithub_pat_[A-Za-z0-9_]{20,}\b|\bgh[pousr]_[A-Za-z0-9]{20,}\b|\bxox[baprs]-[A-Za-z0-9-]{10,}\b|\bsk-[A-Za-z0-9_-]{20,}\b/;
+  const oldPrivateRepositoryPattern =
+    /https?:\/\/github\.com\/karnkrapao\/decc(?:\.git|\/|$)/i;
   const leakedTextPaths = [];
   const credentialValuePaths = [];
+  const oldPrivateRepositoryPaths = [];
 
   for (const relativePath of trackedPaths) {
     if (!trackedTextPathPattern.test(relativePath)) continue;
@@ -140,6 +143,9 @@ if (existsSync(resolve(root, ".git")) && sources.length > 0) {
       }
       if (credentialValuePattern.test(line)) {
         credentialValuePaths.push(`${relativePath}:${index + 1}`);
+      }
+      if (oldPrivateRepositoryPattern.test(line)) {
+        oldPrivateRepositoryPaths.push(`${relativePath}:${index + 1}`);
       }
     });
   }
@@ -155,8 +161,14 @@ if (existsSync(resolve(root, ".git")) && sources.length > 0) {
       `Tracked text contains credential-like secret material:\n- ${credentialValuePaths.join("\n- ")}`,
     );
   }
+
+  if (oldPrivateRepositoryPaths.length > 0) {
+    throw new Error(
+      `Tracked text points users to the archived private repository:\n- ${oldPrivateRepositoryPaths.join("\n- ")}`,
+    );
+  }
 }
 
 console.log(
-  `Source integrity OK · ${declaredModules.length} Rust core modules · ${sources.length} release-critical files · all Git-tracked · no source paths ignored · tracked text free of local user-home paths and credential material`,
+  `Source integrity OK · ${declaredModules.length} Rust core modules · ${sources.length} release-critical files · all Git-tracked · no source paths ignored · tracked text free of local user-home paths, credential material, and archived private-repository links`,
 );

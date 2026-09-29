@@ -16,11 +16,11 @@ Add a workspace once. Let DECC detect the runnable parts inside it, then run, in
 
 ---
 
-> **Preview status:** DECC `0.1.0` is pre-release. Signed public installers are not published yet. When the first production build is ready, it will appear in [GitHub Releases](https://github.com/karnkrapao/decc/releases).
+> **Preview status:** DECC `0.1.0` is pre-release. Signed public installers are not published yet. When the first production build is ready, it will appear in [GitHub Releases](https://github.com/karnkrapao/decc-public/releases).
 
 ## Source availability and licensing
 
-DECC may be published with its source visible while the product is still in preview. The repository currently does not include an open-source license. Distribution and commercial-use terms will be published separately when they are finalized.
+DECC's source is visible in this repository during the preview. Source visibility does not by itself grant an open-source license. This repository currently does not include an open-source license, and distribution/commercial-use terms will be published separately when they are finalized.
 
 ## Why DECC
 
@@ -89,7 +89,7 @@ Tauri documents DMG as the standard outside-the-App-Store installation experienc
 
 ### Releases
 
-Production builds will be published from the [GitHub Releases page](https://github.com/karnkrapao/decc/releases) after cross-platform verification, signing/notarization checks, and final release review pass.
+Production builds will be published from the [GitHub Releases page](https://github.com/karnkrapao/decc-public/releases) after cross-platform verification, signing/notarization checks, and final release review pass.
 
 Release tags prepare a **draft** GitHub Release first so the final assets and notes can be reviewed before publishing.
 
@@ -123,6 +123,12 @@ DECC treats local developer projects as trusted-but-sensitive data.
 
 If a signing key, credential, or token is ever exposed, removing it from Git history is not enough—the credential must also be rotated.
 
+## Feedback and contributions
+
+Bug reports and product feedback are welcome through [GitHub Issues](https://github.com/karnkrapao/decc-public/issues). Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. During the preview, external code contributions are not accepted by default while contributor and licensing terms are still being finalized.
+
+Security vulnerabilities should follow [SECURITY.md](SECURITY.md) instead of being reported in a public issue.
+
 ## Build from source
 
 ### Requirements
@@ -135,8 +141,8 @@ If a signing key, credential, or token is ever exposed, removing it from Git his
 ### Setup
 
 ```bash
-git clone https://github.com/karnkrapao/decc.git
-cd decc
+git clone https://github.com/karnkrapao/decc-public.git
+cd decc-public
 pnpm install --frozen-lockfile
 pnpm tauri dev
 ```

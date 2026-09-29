@@ -3,6 +3,14 @@
   "private": true,
   "version": "0.1.0",
   "description": "Local-first desktop developer control center",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karnkrapao/decc-public.git"
+  },
+  "homepage": "https://github.com/karnkrapao/decc-public#readme",
+  "bugs": {
+    "url": "https://github.com/karnkrapao/decc-public/issues"
+  },
   "type": "module",
   "packageManager": "pnpm@12.5.1",
   "scripts": {
