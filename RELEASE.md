@@ -40,12 +40,13 @@ The separate GitHub Actions **Preview Release** workflow is for early public tes
 
 It:
 
-- validates that the preview tag does **not** start with `v`,
+- requires the preview tag to use the `preview-*` namespace,
 - runs the existing macOS release preflight and produces a DMG,
 - runs the existing Windows release preflight and installer lifecycle smoke,
-- publishes only the user-installable DMG and NSIS installer,
-- generates `SHA256SUMS.txt`,
-- prepares a **draft GitHub pre-release** with explicit unsigned/not-notarized warnings.
+- prepares a **draft GitHub pre-release** before platform builds,
+- uploads the user-installable DMG and NSIS installer directly from their platform runners,
+- uploads an adjacent `.sha256` checksum file for each installer,
+- keeps the draft unpublished until the assets and warnings are reviewed.
 
 Preview tags use the `preview-*` namespace. Production `v*` tags remain reserved for the fail-closed signed distribution path.
 
