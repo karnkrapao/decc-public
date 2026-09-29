@@ -1,3 +1,4 @@
+pub(crate) mod background_command;
 pub mod discovery;
 pub mod environment;
 pub mod git;

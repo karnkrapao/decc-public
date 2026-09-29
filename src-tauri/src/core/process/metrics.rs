@@ -1,12 +1,12 @@
-use std::{
-    collections::HashMap,
-    process::{Command, Stdio},
-};
+use std::{collections::HashMap, process::Stdio};
 
 #[cfg(unix)]
 use std::collections::HashSet;
 
-use crate::models::process::{ProcessStatus, ProcessUsage};
+use crate::{
+    core::background_command::background_command,
+    models::process::{ProcessStatus, ProcessUsage},
+};
 
 pub fn inspect(processes: &[ProcessStatus]) -> Result<Vec<ProcessUsage>, String> {
     if processes.is_empty() {
@@ -45,7 +45,7 @@ fn inspect_unix(processes: &[ProcessStatus]) -> Result<Vec<ProcessUsage>, String
     } else {
         "/usr/bin/ps"
     };
-    let output = Command::new(ps)
+    let output = background_command(ps)
         .args(["-axo", "pid=,ppid=,%cpu=,rss="])
         .stdin(Stdio::null())
         .output()
@@ -131,7 +131,7 @@ fn inspect_unix(processes: &[ProcessStatus]) -> Result<Vec<ProcessUsage>, String
 
 #[cfg(windows)]
 fn inspect_windows(processes: &[ProcessStatus]) -> Result<Vec<ProcessUsage>, String> {
-    let output = Command::new("tasklist")
+    let output = background_command("tasklist")
         .args(["/FO", "CSV", "/NH"])
         .stdin(Stdio::null())
         .output()

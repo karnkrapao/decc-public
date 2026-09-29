@@ -2,11 +2,12 @@ use std::{
     fs,
     io::{ErrorKind, Read},
     path::{Path, PathBuf},
-    process::{Child, Command, ExitStatus, Stdio},
+    process::{Child, ExitStatus, Stdio},
     thread,
     time::{Duration, Instant},
 };
 
+use crate::core::background_command::background_command;
 use crate::models::{
     git::{
         GitChange, GitChangeStatus, GitCommit, GitInspectionState, WorkspaceGitHeadInspection,
@@ -583,7 +584,7 @@ fn run_git_with_program_mode(
     timeout: Duration,
     disable_optional_locks: bool,
 ) -> Result<GitCommandOutput, GitRunError> {
-    let mut command = Command::new(program);
+    let mut command = background_command(program);
     command
         .arg("-c")
         .arg("core.fsmonitor=false")
@@ -833,10 +834,10 @@ fn parse_commits(bytes: &[u8], limit: usize) -> Vec<GitCommit> {
 mod tests {
     use std::{
         fs,
-        process::Command,
         time::{SystemTime, UNIX_EPOCH},
     };
 
+    use crate::core::background_command::background_command;
     #[cfg(unix)]
     use std::time::{Duration, Instant};
 
@@ -975,7 +976,7 @@ mod tests {
 
     #[test]
     fn lightweight_head_inspection_reports_branch_without_full_git_payload() {
-        if Command::new("git").arg("--version").output().is_err() {
+        if background_command("git").arg("--version").output().is_err() {
             return;
         }
 
@@ -986,7 +987,7 @@ mod tests {
         let root = std::env::temp_dir().join(format!("decc-git-head-{unique}"));
         fs::create_dir_all(&root).expect("root");
 
-        if !Command::new("git")
+        if !background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["init", "-q"])
@@ -998,7 +999,7 @@ mod tests {
             return;
         }
 
-        let current = Command::new("git")
+        let current = background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["branch", "--show-current"])
@@ -1026,7 +1027,7 @@ mod tests {
 
     #[test]
     fn switches_existing_local_branch_only_when_repository_is_clean() {
-        if Command::new("git").arg("--version").output().is_err() {
+        if background_command("git").arg("--version").output().is_err() {
             return;
         }
 
@@ -1037,7 +1038,7 @@ mod tests {
         let root = std::env::temp_dir().join(format!("decc-git-switch-{unique}"));
         fs::create_dir_all(&root).expect("root");
 
-        let init = Command::new("git")
+        let init = background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["init", "-q"])
@@ -1049,13 +1050,13 @@ mod tests {
         }
 
         fs::write(root.join("tracked.txt"), "one\n").expect("tracked");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["add", "."])
             .status()
             .expect("git add");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args([
@@ -1071,14 +1072,14 @@ mod tests {
             .status()
             .expect("git commit");
 
-        let current = Command::new("git")
+        let current = background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["branch", "--show-current"])
             .output()
             .expect("current branch");
         let original = String::from_utf8_lossy(&current.stdout).trim().to_string();
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["branch", "feature"])
@@ -1111,7 +1112,7 @@ mod tests {
 
     #[test]
     fn isolates_non_repository_state_per_workspace() {
-        if Command::new("git").arg("--version").output().is_err() {
+        if background_command("git").arg("--version").output().is_err() {
             return;
         }
 
@@ -1125,7 +1126,7 @@ mod tests {
         fs::create_dir_all(&repo).expect("repo");
         fs::create_dir_all(&plain).expect("plain");
 
-        let init = Command::new("git")
+        let init = background_command("git")
             .arg("-C")
             .arg(&repo)
             .args(["init", "-q"])
@@ -1159,7 +1160,7 @@ mod tests {
 
     #[test]
     fn scopes_nested_workspace_changes_and_history_to_its_path() {
-        if Command::new("git").arg("--version").output().is_err() {
+        if background_command("git").arg("--version").output().is_err() {
             return;
         }
 
@@ -1172,7 +1173,7 @@ mod tests {
         let nested = root.join("apps/web");
         fs::create_dir_all(&nested).expect("nested");
 
-        let init = Command::new("git")
+        let init = background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["init", "-q"])
@@ -1185,13 +1186,13 @@ mod tests {
 
         fs::write(root.join("root.txt"), "root one\n").expect("root file");
         fs::write(nested.join("tracked.txt"), "web one\n").expect("nested file");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["add", "."])
             .status()
             .expect("git add");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args([
@@ -1208,13 +1209,13 @@ mod tests {
             .expect("initial commit");
 
         fs::write(root.join("root.txt"), "root two\n").expect("root modify");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["add", "root.txt"])
             .status()
             .expect("git add root");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args([
@@ -1272,7 +1273,7 @@ mod tests {
 
     #[test]
     fn inspects_a_real_temporary_repository_when_git_is_available() {
-        if Command::new("git").arg("--version").output().is_err() {
+        if background_command("git").arg("--version").output().is_err() {
             return;
         }
         let unique = SystemTime::now()
@@ -1282,7 +1283,7 @@ mod tests {
         let root = std::env::temp_dir().join(format!("decc-git-{unique}"));
         fs::create_dir_all(&root).expect("root");
 
-        let init = Command::new("git")
+        let init = background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["init", "-q"])
@@ -1293,13 +1294,13 @@ mod tests {
             return;
         }
         fs::write(root.join("tracked.txt"), "one\n").expect("tracked");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args(["add", "tracked.txt"])
             .status()
             .expect("git add");
-        Command::new("git")
+        background_command("git")
             .arg("-C")
             .arg(&root)
             .args([

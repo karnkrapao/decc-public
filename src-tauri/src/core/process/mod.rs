@@ -6,7 +6,7 @@ use std::{
     collections::HashMap,
     io::{BufRead, BufReader, Read},
     path::PathBuf,
-    process::{Child, Command, Stdio},
+    process::{Child, Stdio},
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
@@ -22,7 +22,7 @@ use std::time::Instant;
 use windows_job::WindowsJob;
 
 use crate::{
-    core::runtime,
+    core::{background_command::background_command, runtime},
     models::{
         process::{
             BulkProcessResult, ProcessActionError, ProcessEvent, ProcessEventKind, ProcessStatus,
@@ -98,7 +98,7 @@ impl ProcessManager {
             ),
         );
 
-        let mut command = Command::new(&execution.program);
+        let mut command = background_command(&execution.program);
         command
             .args(&component.args)
             .current_dir(&working_directory)

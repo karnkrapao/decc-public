@@ -1,12 +1,12 @@
 use std::{
     collections::{HashMap, HashSet},
     path::{Path, PathBuf},
-    process::Command,
 };
 
 #[cfg(windows)]
 mod windows_process;
 
+use crate::core::background_command::background_command;
 use crate::models::{
     ports::{
         ComponentPortInspection, PortListenerObservation, PortListenerOrigin,
@@ -245,7 +245,7 @@ fn pid_belongs_to_owned(
 
 #[cfg(target_os = "macos")]
 fn inspect_listeners() -> Result<Vec<RawListener>, String> {
-    let output = Command::new("/usr/sbin/lsof")
+    let output = background_command("/usr/sbin/lsof")
         .args(["-nP", "-iTCP", "-sTCP:LISTEN", "-Fpcn"])
         .output()
         .map_err(|error| format!("Could not inspect listening TCP ports with lsof: {error}"))?;
@@ -270,7 +270,7 @@ fn inspect_listeners() -> Result<Vec<RawListener>, String> {
             .map(u32::to_string)
             .collect::<Vec<_>>()
             .join(",");
-        if let Ok(cwd_output) = Command::new("/usr/sbin/lsof")
+        if let Ok(cwd_output) = background_command("/usr/sbin/lsof")
             .args(["-nP", "-a", "-p", &pid_list, "-d", "cwd", "-Fpcn"])
             .output()
         {
@@ -310,7 +310,7 @@ fn inspect_listeners() -> Result<Vec<RawListener>, String> {
 
 #[cfg(windows)]
 fn inspect_listeners(process_snapshot: &ProcessSnapshot) -> Result<Vec<RawListener>, String> {
-    let output = Command::new("netstat.exe")
+    let output = background_command("netstat.exe")
         .args(["-ano", "-p", "tcp"])
         .output()
         .map_err(|error| format!("Could not inspect listening TCP ports with netstat: {error}"))?;
@@ -345,7 +345,7 @@ fn inspect_listeners() -> Result<Vec<RawListener>, String> {
 fn run_first_available(candidates: &[(&str, &[&str])]) -> Result<std::process::Output, String> {
     let mut last_error = None;
     for (program, args) in candidates {
-        match Command::new(program).args(*args).output() {
+        match background_command(program).args(*args).output() {
             Ok(output) if output.status.success() => return Ok(output),
             Ok(output) => {
                 last_error = Some(format!(

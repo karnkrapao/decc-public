@@ -3,11 +3,12 @@ use std::{
     ffi::{OsStr, OsString},
     fs,
     path::{Path, PathBuf},
-    process::{Command, Stdio},
+    process::Stdio,
 };
 
 use serde_json::Value;
 
+use crate::core::background_command::background_command;
 use crate::models::{
     runtime::{
         ComponentRuntimeInspection, RuntimeDiagnosticStatus, ToolRuntimeDiagnostic,
@@ -352,7 +353,7 @@ fn inspect_tool(spec: ToolSpec) -> ToolRuntimeDiagnostic {
         };
     }
 
-    let mut command = Command::new(&executable);
+    let mut command = background_command(&executable);
     command
         .args(&spec.version_args)
         .current_dir(std::env::temp_dir())
@@ -1522,7 +1523,7 @@ fn normalize_node_version_label(value: &str) -> Option<String> {
 }
 
 fn probe_node_version(executable: &Path) -> Option<String> {
-    let output = Command::new(executable)
+    let output = background_command(executable)
         .arg("--version")
         .current_dir(std::env::temp_dir())
         .stdin(Stdio::null())
