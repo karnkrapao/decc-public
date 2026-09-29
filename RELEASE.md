@@ -52,6 +52,8 @@ Preview tags use the `preview-*` namespace. Production `v*` tags remain reserved
 
 The preview workflow never calls the strict production signing verification scripts. This is intentional for early testing and does not weaken the production/tag gates.
 
+Because release immutability is enabled, every platform asset-upload step must explicitly preserve `draft: true` until both platforms and their checksum files are present. Publishing a partial preview would make that release immutable before the remaining assets can be attached.
+
 ## Version rule
 
 `package.json`, `src-tauri/tauri.conf.json`, and `src-tauri/Cargo.toml` must contain the same version.

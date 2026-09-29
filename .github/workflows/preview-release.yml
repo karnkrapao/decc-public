@@ -126,6 +126,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.preview_tag }}
+          draft: true
+          prerelease: true
           fail_on_unmatched_files: true
           files: |
             src-tauri/target/release/bundle/dmg/*.dmg
@@ -184,6 +186,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ inputs.preview_tag }}
+          draft: true
+          prerelease: true
           fail_on_unmatched_files: true
           files: |
             src-tauri/target/release/bundle/nsis/*-setup.exe
